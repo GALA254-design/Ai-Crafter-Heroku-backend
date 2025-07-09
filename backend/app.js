@@ -1,39 +1,40 @@
 require('dotenv').config();
 const express = require('express');
-const sequelize = require('./config/database'); // Your Sequelize database connection
-const cors = require('cors'); // Import cors for cross-origin requests
+const sequelize = require('./config/database'); // Sequelize DB connection
+const cors = require('cors');
 
-// Import your existing routes
 const storyRoutes = require('./routes/storyRoutes');
 const userRoutes = require('./routes/userRoutes');
 const projectRoutes = require('./routes/projectRoutes');
 const llmRoutes = require('./routes/llm.js');
 const fileRoutes = require('./routes/fileRoutes');
-
-// Import the new authentication routes
-const authRoutes = require('./routes/authRoutes'); // Assuming you've created this file as discussed
+const authRoutes = require('./routes/authRoutes');
 
 const app = express();
+
+// Enable Cross-Origin Resource Sharing
 app.use(cors());
 
-// Body parser for JSON requests. This is essential for handling POST/PUT request bodies.
+// Body parser for JSON and URL-encoded data
 app.use(express.json());
-// Body parser for URL-encoded form data (less common for APIs, but good to have).
 app.use(express.urlencoded({ extended: true }));
 
-// --- Routes ---
-// Health check endpoint
-app.get('/', (req, res) => res.send('AI Novel Assistant API Running!'));
+// ✅ Root route for Heroku (shows basic message)
+app.get('/', (req, res) => {
+  res.send('🚀 AI Novel Assistant API Running on Heroku!');
+});
 
-// Mount your API routes
+// ✅ Optional health check route
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString() });
+});
+
+// Mount API routes
 app.use('/api/stories', storyRoutes);
-app.use('/api/users', userRoutes); // User management (e.g., creating users via registration)
+app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/llm', llmRoutes);
 app.use('/api/files', fileRoutes);
-
-// NEW: Mount your authentication routes.
-// We're mounting it under '/api' so your login endpoint becomes '/api/login'.
 app.use('/api', authRoutes);
 
 module.exports = app;
